@@ -7,56 +7,6 @@
 
 #include "fonctions.h"
 
-/* La tâche Asservissement, en fonction de la mise à jour ou non des valeurs du STM32,
- * calcule puis envoie dans la file de message une nouvelle consigne de courant pour le STM
- * fonctions : rt_queue_write pour écrire dans la file de message
- * variables : etat_com, etat_angle, etat_reception, consigne_couple
- * semaphore : sem_envoyer */
-void Asservissement(void *arg) 
-{
-	
-	rt_printf("Thread Asservissement: Debut de l'exécution de periodique à 50 Hz\n");
-	rt_task_set_periodic(NULL, TM_NOW, 20000000);
-
-	log_task_entered();
-	
-	while (1) {
-
-		rt_task_wait_period(NULL);
-	
-	}
-}
-
-/* La tâche Presence_User vérifie périodiquement la présence de l'utilisateur sur le gyropode
- *  déclenche l'arrêt d'urgence si l'utilisateur n'est pas présent
- * variables : etat_com, presence_user
- * semaphore : sem_arret */
- void Presence_User(void *arg) 
-{
-	
-}
-
-/* La tâche Surveillance_Batterie vérifie périodiquement le niveau de batterie du gyropode
- *  déclenche l'arrêt d'urgence si la batterie est trop faible (<15%)
- * variables : etat_com, presence_user, batterie, arret
- * semaphore : sem_arret */
- void Surveillance_Batterie(void *arg) /* OK */
-{
-	int com, arr, pres;
-	int bat_lvl;
-
-	rt_printf("Thread Surveillance_Batterie : Debut de l'éxecution de periodique à 1 Hz\n");
-	rt_task_set_periodic(NULL, TM_NOW, 1000000000);
-
-	log_task_entered();
-	
-	while (1) {
-  
-		rt_task_wait_period(NULL);
-		
-	}
-}
-
 /* La tâche Communication est chargée de mettre en place la communication avec le STM32,
  *  à la réception d'un mesage du STM, elle décripte la trame et met à jour les informations
  *  des variables partagées.
@@ -189,45 +139,4 @@ void Affichage(void *arg){
 
 		send_trame(sckt_gui, str, &indice);
     	}
-}
-
-/* Cette fonction peut être déclenchée par les threads Presence_user et Surveillance_Batterie,
- *  elle envoie alors sur la file de messages un message de type arrêt ('a',1) qui sera envoyé au STM32
- * fonctions : rt_queue_write pour écrire dans la file de message, rt_sem_p pour attendre la libération du sémaphore
- * variables : arret */
-
-void Arret_Urgence(void *arg){	
-
-	log_task_entered();
-
-	while(1){
-		rt_task_wait_period(NULL);
-	}
-}
-
-/* La tâche Envoyer est simplement chargée d'envoyer les messages contenus dans la file de messages
- *  au STM32 à travers la liaison UART
- * fonctions : rt_queue_read, send_float_to serial, send_int_to_serial
- * variables : etat_com, etat_angle, etat_reception, consigne_couple */
-
-void Envoyer(void *arg){
-
-	rt_printf("Thread Envoyer : Debut de l'éxecution de periodique à 100 Hz\n");
-	rt_task_set_periodic(NULL, TM_NOW, 10000000);
-
-	log_task_entered();
-
-	while(1){
-		rt_task_wait_period(NULL);
-
-		message_stm m;
-		int err = rt_queue_read(&queue_Msg2STM,&m,sizeof(message_stm),SECENTOP / 10000);
-
-		if(m.label == 'c'){
-			send_float_to_serial(m.fval,'c');
-		}
-		else if(m.label == 'a'){
-			send_int_to_serial(m.ival,'a');
-		}
-	}
 }
