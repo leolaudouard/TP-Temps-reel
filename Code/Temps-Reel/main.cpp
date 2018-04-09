@@ -174,18 +174,7 @@ void startTasks() {
 		exit(EXIT_FAILURE);
 	}
 
-	if (err = rt_task_start(&th_Asservissement, &Asservissement, NULL)){
-		rt_printf("Error task start: %s\n", strerror(-err));
-		exit(EXIT_FAILURE);
-	}
-
 	if (err = rt_task_start(&th_Affichage, &Affichage, NULL)){
-		rt_printf("Error task start: %s\n", strerror(-err));
-		exit(EXIT_FAILURE);
-	}
-
-	
-	if (err = rt_task_start(&th_Envoyer, &Envoyer, NULL)){
 		rt_printf("Error task start: %s\n", strerror(-err));
 		exit(EXIT_FAILURE);
 	}
